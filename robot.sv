@@ -1,23 +1,23 @@
 module robot (
 	input [1:0] SW,       // SW[1:0] for direction
 	input KEY[3:0],       // KEY[3] to save, KEY[2] to execute, KEY[1] reset
-	input clk,
-	input delay_timer;    // 2s
+	input clk,			  // On DE2-115 board freq of timer is :50MHZ, 50'000'000 times = 1s
 	output reg [3:0] HEX, // 7-segment display outputs
 	output reg [17:0] LEDR, // LEDs for torque representation
-	output done	
+	output done	,
 	output reg [6:0] HEX0, // 
     output reg [6:0] HEX1, // 
     output reg [6:0] HEX2, // 
     output reg [6:0] HEX3  // 
-	output [17:0] LEDR,                  // 18 red LEDs
+	output [17:0] LEDR                // 18 red LEDs
 );
 	
-    typedef enum [1:0] {IDLE, Programming, Execute} state_type;
+    typedef enum [1:0] {IDLE, Programming, Execute, Reset} state_type;
     state_type state, next_state;
 
 	reg [7:0] command_counter = 0; // can count up to 256
-	reg [1:0] command_array[255:0];
+	reg [7:0] reset_counter = 0; // Used for resetting the command_array
+	reg [1:0] command_array[255:0]; // Array to store commands
 
 
 	// Next state logic
@@ -35,6 +35,11 @@ module robot (
 			Execute:
 				if (KEY[1]) next_state = Programming;
 				else next_state = Execute;
+
+			Reset:
+			    if (reset_counter == 255) next_state = Programming;
+            	else next_state = Reset;
+
 		endcase
 	end
 
@@ -98,8 +103,12 @@ module robot (
                             HEX3 <= 7'b0000011;
 							LEDR <= 18'b1111000011110000
 						}
-						// TODO: 亮灯
+
                 	}
+
+					Reset:
+						command_array[reset_counter] <= 0;
+						reset_counter = reset_counter + 1;	
 
 			endcase
 		end
