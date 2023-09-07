@@ -4,7 +4,7 @@ module robot (
 	input clk,			  // On DE2-115 board freq of timer is :50MHZ, 50'000'000 times = 1s
 	output reg [3:0] HEX, // 7-segment display outputs
 	output reg [17:0] LEDR, // LEDs for torque representation
-	output done	,
+	output done,
 	output reg [6:0] HEX0, // 
     output reg [6:0] HEX1, // 
     output reg [6:0] HEX2, // 
@@ -12,7 +12,7 @@ module robot (
 	output [17:0] LEDR                // 18 red LEDs
 );
 	
-    typedef enum [1:0] {IDLE, Programming, Execute, Reset} state_type;
+    typedef enum [1:0] {IDLE, Programming, ExecCmd, ExecDelay, Reset} state_type;
     state_type state, next_state;
 
 	reg [7:0] command_counter = 0; // can count up to 256
@@ -25,16 +25,20 @@ module robot (
 		unique case (state)
 			IDLE:
 				if (KEY[1]) next_state = Programming;
-				else next_state = IDLE;
+				else next_state = IDLE; 
 
 			Programming:
 				if (KEY[3]) next_state = Programming;
 				else if (KEY[2]) next_state = Execute;
 				else next_state = Programming;
-
-			Execute:
-				if (KEY[1]) next_state = Programming;
-				else next_state = Execute;
+				
+			Execute: begin
+				if (KEY[1]) next_state = Reset;
+				else if (command_counter == 0) done = 1;
+				else 
+				next_state = Execute;
+				command_counter = command_counter-1;
+			end
 
 			Reset:
 			    if (reset_counter == 255) next_state = Programming;
@@ -47,14 +51,13 @@ module robot (
 	always @(posedge clk or posedge rst) begin
 		if (!rst) begin
 			state <= IDLE; 
+			done <= 0;
 			// TODO: Add other reset logic if necessary
 		end
 		else begin
 			state <= next_state;
 
 			case (state)
-				IDLE: 
-					// TODO: 等待
 
 				Programming: 
 					if (KEY[3]) begin
