@@ -10,7 +10,7 @@ module robot (
     output reg [6:0] HEX3 // 
 );
 	
-    typedef enum logic [3:0] {IDLE = 4'b0000, Programming = 4'b0001, Execute = 4'b0010, Run = 4'b0100, Reset = 4'b1000} state_type;
+    typedef enum logic [3:0] {Programming = 4'b0001, Execute = 4'b0010, Run = 4'b0100, Reset = 4'b1000} state_type;
     state_type state, next_state;
 	
 	reg [7:0] command_counter = 0; // can count up to 256
@@ -24,10 +24,6 @@ module robot (
 	// Next state logic
 	always_comb begin 
 		unique case (state)
-			IDLE:begin
-				if (KEY[1]) next_state = Programming;
-				else next_state = IDLE; 
-			end
 
 			Programming:begin
 				if (KEY[3]) next_state = Programming; //Key[3] record command 
