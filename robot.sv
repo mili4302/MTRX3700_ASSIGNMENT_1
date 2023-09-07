@@ -6,6 +6,11 @@ module robot (
 	output reg [3:0] HEX, // 7-segment display outputs
 	output reg [17:0] LEDR, // LEDs for torque representation
 	output done	
+	output reg [6:0] HEX0, // 
+    output reg [6:0] HEX1, // 
+    output reg [6:0] HEX2, // 
+    output reg [6:0] HEX3  // 
+	output [17:0] LEDR,                  // 18 red LEDs
 );
 	
     typedef enum [1:0] {IDLE, Programming, Execute} state_type;
@@ -61,6 +66,38 @@ module robot (
 						command_counter <= 8'd0; // Command_counter = 0
 						done <= 0; // done = 0
 					end else {
+						if(SW == 2'b00) // 前
+						{
+							HEX0 <= 7'b1111111; //
+                            HEX1 <= 7'b1111111;
+                            HEX2 <= 7'b0001110;
+                            HEX3 <= 7'b1111111;
+							LEDR <= 18'b0000111100001111
+						}
+						else if(SW == 2'b01) // 右
+						{
+							HEX0 <= 7'b0101111; //
+                            HEX1 <= 7'b1111111;
+                            HEX2 <= 7'b1111111;
+                            HEX3 <= 7'b1111111;
+							LEDR <= 18'b0000111100001100
+						}
+						else if(SW == 2'b10)  // 左
+						{
+							HEX0 <= 7'b1111111; // 
+                            HEX1 <= 7'b1000111;
+                            HEX2 <= 7'b1111111;
+                            HEX3 <= 7'b1111111;
+							LEDR <= 18'b0000110000001111
+						}
+						else if(SW == 2'b11)    // 后
+						{
+							HEX0 <= 7'b1111111; // 
+                            HEX1 <= 7'b1111111;
+                            HEX2 <= 7'b1111111;
+                            HEX3 <= 7'b0000011;
+							LEDR <= 18'b1111000011110000
+						}
 						// TODO: 亮灯
                 	}
 
