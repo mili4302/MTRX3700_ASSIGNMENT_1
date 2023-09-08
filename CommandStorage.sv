@@ -1,11 +1,11 @@
 module CommandStorage (
-    input logic [1:0] SW,               // 输入信号，代表所选择的命令方向
+    input logic [3:0] control_sgin,               // 输入信号，代表所选择的命令方向SW
     input logic clk,                    // 时钟信号
     input logic save_command,           // 控制信号，当为高时，当前命令将被保存到BRAM中
     input logic reset_command,          // 控制信号，当为高时，当前命令地址的内容将被重置
     input logic read_command,           // 控制信号，当为高时，从当前命令地址读取命令
     output logic [7:0] command_counter, // 输出信号，表示当前的命令地址
-    output logic [1:0] current_command  // 输出信号，表示从BRAM中读取的当前命令
+    output logic [3:0] current_command  // 输出信号，表示从BRAM中读取的当前命令
 );
 
     // 这是BRAM接口的信号
@@ -28,9 +28,11 @@ module CommandStorage (
     always_ff @(posedge clk) begin
         // 当save_command为高时，将命令保存到BRAM中
         if (save_command) begin
-            data_to_bram <= {2'b00, SW};  // 将命令转换成四位并且放入data_to_bram的低位
+            data_to_bram <= motor_control_sgin;  // 将命令转换成四位并且放入data_to_bram的低位
             wren_bram <= 1'b1;            // 激活写入信号
-            if (command_counter < 255) command_counter <= command_counter + 1;  // 更新命令地址
+            if (command_counter < 255) begin
+                command_counter <= command_counter + 1;  // 更新命令地址
+            end
         end 
         // 当read_command为高时，从BRAM的当前地址读取命令
         else if (read_command) begin
@@ -49,6 +51,6 @@ module CommandStorage (
     end
     
     // 输出从BRAM中读取的当前命令
-    assign current_command = data_from_bram[1:0];
+    assign current_command = data_from_bram[3:0];
 
 endmodule

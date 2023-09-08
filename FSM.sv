@@ -1,9 +1,7 @@
 module FSM (
-    input logic [1:0] SW,                // 输入的方向命令
+    input logic [3:0] control_sgin,                // 输入的方向命令
     input logic clk,                     // 时钟信号
-    input logic [3:0] KEY,               // 输入按键，KEY[3] 用于保存，KEY[2] 用于执行，KEY[1] 用于复位
-    output logic [3:0] HEX,              // 七段显示器输出
-    output logic [17:0] LEDR             // LED输出
+    input logic button1, button2, button3               // 输入按键，KEY[3] 用于保存，KEY[2] 用于执行，KEY[1] 用于复位
 );
 
     // 定义状态枚举
@@ -29,7 +27,7 @@ module FSM (
 
     // 使用CommandStorage模块
     CommandStorage command_storage (
-        .SW(SW),
+        .control_sgin(SW),
         .clk(clk),
         .save_command(save_command),
         .reset_command(reset_command),
@@ -42,15 +40,15 @@ module FSM (
     always_comb begin 
         unique case (state)
             Programming: begin
-                // 在Programming state，KEY[3] 保存命令，KEY[2] 进入执行状态
-                if (KEY[3]) next_state = Programming; 
-                else if (KEY[2] || command_counter == 255) next_state = Execute;
+                // 在Programming state,KEY[3] 保存命令,KEY[2] 进入执行状态
+                if (button3) next_state = Programming; 
+                else if (button2 || command_counter == 255) next_state = Execute;
                 else next_state = Programming;
             end
                 
             Execute: begin
                 // 在Execute state，KEY[1] 进入Reset状态，否则进入运行状态
-                if (KEY[1] || execute_done == 1) next_state = Reset; 
+                if (button1 || execute_done == 1) next_state = Reset; 
                 else next_state = Run;
             end
 
