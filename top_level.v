@@ -32,7 +32,7 @@ module top_level (
         .button1(rest_button),
         .button2(execute_button),
         .button3(save_button),
-    )
+    );
 
     motor_cotorl mc (
         .clk( CLOCK_50 ),
